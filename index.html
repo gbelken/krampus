@@ -1,0 +1,64 @@
+<html>
+    <head><title>Tree Web Controller</title></head>
+    <body>
+        <h1>Tree Controller Screen Boo ya</h1>
+        <p>
+            tree can be controlled from here lol
+        </p>
+        <div>
+            <button id="Start">Start</button>
+            <button id="Stop">Stop</button>
+            <button id="Loop">Loop</button>
+            <button id="Status">Status</button>
+            <button id="ChangeColor">Change Color</button>
+        </div>
+        <h5>Status Log</h5>
+        <div>
+          <textarea id="status" cols=100 rows=50></textarea>
+        </div>
+    </body>
+    <script type="text/javascript">
+        document.addEventListener("DOMContentLoaded", (event) => {
+            let startButton = document.getElementById("Start");
+            let stopButton = document.getElementById("Stop");
+            let loopButton = document.getElementById("Loop");
+            let statusButton = document.getElementById("Status");
+            let statusText = document.getElementById("status");
+            let colorChange = document.getElementById("ChangeColor");
+
+            colorChange.addEventListener("click", async (event)=> {
+              let response = await fetchAsync("/api/colorChange");
+              statusText.value = statusText.value + '\n' + response;
+            })
+
+
+            startButton.addEventListener("click", async (event)=> {
+              let response = await fetchAsync("/api/start");
+              console.log("start");
+              status.value = 'start';
+              statusText.value = statusText.value + '\n' + response;
+            })
+
+            stopButton.addEventListener("click", async (event)=> {
+              let response = await fetchAsync("/api/stop");
+              statusText.value = statusText.value + '\n' + response;
+            })
+
+            loopButton.addEventListener("click", async (event)=> {
+              let response = await fetchAsync("/api/loop");
+              statusText.value = statusText.value + '\n' + response;
+            })
+
+            statusButton.addEventListener("click", async (event)=> {
+              let response = await fetchAsync("/api/status");
+              statusText.value = statusText.value + '\n' + response;
+            })
+
+            async function fetchAsync(url) {
+              let response = await fetch(url);
+              let data = await response.text();
+              return data;
+            }
+        })    
+    </script>
+</html>
