@@ -1,0 +1,22 @@
+body {
+    background: #39f;
+    min-height: 100vh;
+    padding: 0;
+}
+
+.color {
+    width: 25px;
+    height: 25px;
+    border: solid 1px #000;
+    display: inline-block;
+}
+
+#Colors .pallette:hover
+{
+    border: solid 1px #FF0000
+}
+
+.selected 
+{
+    border: solid 1px #000;
+}

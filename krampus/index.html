@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Krampus the Controller</title>
+
+      <!-- UIkit CSS -->
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.9.2/dist/css/uikit.min.css" />
+      <link rel="stylesheet" href="/css/site.css" />
+
+      <!-- UIkit JS -->
+      <script src="https://cdn.jsdelivr.net/npm/uikit@3.9.2/dist/js/uikit.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/uikit@3.9.2/dist/js/uikit-icons.min.js"></script>
+    </head>
+    <body>
+      <div uk-grid>
+        <div class="uk-align-center uk-width-1-6">
+          
+        </div>
+        <div class="uk-align-center uk-width-2-3">      
+        
+        <img data-src="images/christmas-pine-tree.png" width="200" height="200" alt="Tree" class="uk-responsive-height uk-responsive-width" uk-img>
+        <img data-src="images/krampus.png" uk-img>
+        <div>
+            <button id="Start" class="uk-button uk-button-primary" >Start</button>
+            <button id="Stop" class="uk-button uk-button-danger" >Stop</button>
+            <button id="Loop" class="uk-button uk-button-secondary">Loop</button>
+            <button id="Status" class="uk-button uk-button-secondary">Status</button>
+        </div>
+        <h5>Add to Sequence</h5>
+        <div class="uk-grid-small uk-child-width-expand@s uk-text-center" uk-grid>
+            <div class="uk-width-5-6">
+              <select id="SequenceItem" class="uk-select">
+                <option value="" default>Select Sequence</option>
+                <option value="TopToBottom">Top to Bottom</option>
+                <option value="BottomUp">Bottom Up</option>
+                <option value="SnakeTheTree">Shake the Tree</option>
+                <option value="TreeColor">Tree Color</option>
+                <option value="RainbowTree">Rainbow Tree</option>
+              </select>
+            </div>
+            <div class="uk-width-1-6">
+              <button id="AddSequenceItem" class="uk-button uk-button-default">Add</button>
+            </div>
+            <div class="uk-width-expand@m">
+              <button type="button" class="uk-button uk-button-default">View Colors ></button>
+              <div uk-dropdown="mode: click" id="Colors"></div>
+              <button id="ChangeColor" class="uk-button uk-button-secondary">Change Color</button>
+            </div>
+            <div class="uk-width-1-6"></div>
+        </div>
+      </div>
+    </div>
+    </body>
+    <script type="text/javascript">
+        function rgb(r, g, b){
+          return ["rgb(",r,",",g,",",b,")"].join("");
+        }
+
+        document.addEventListener("DOMContentLoaded", (event) => {
+            let startButton = document.getElementById("Start");
+            let stopButton = document.getElementById("Stop");
+            let loopButton = document.getElementById("Loop");
+            let statusButton = document.getElementById("Status");
+            let statusText = document.getElementById("status");
+            let colorChange = document.getElementById("ChangeColor");
+            let addSequenceItem = document.getElementById("AddSequenceItem");
+            let selectedColorName = '';
+
+            (async() => {
+              const pallettes = await fetchAsync('/api/color');
+              const colorDiv = document.getElementById("Colors");
+
+
+              pallettes.map(pallete => {
+
+                  let palletteDiv = document.createElement("div");
+                  palletteDiv.setAttribute("name", pallete.name);
+                  palletteDiv.className = "pallette";
+
+                  let p = document.createElement("p");
+                  p.innerText = pallete.name;
+                  palletteDiv.appendChild(p);
+
+                pallete.colors.map(color => {
+                    let div = document.createElement("div");
+                    div.className = "color";
+                    div.style.backgroundColor = rgb(color[0], color[1], color[2])
+                    palletteDiv.appendChild(div);
+                  });
+
+                  colorDiv.appendChild(palletteDiv)
+                });
+                
+                document.querySelectorAll(".pallette").forEach(element => {
+                    element.addEventListener("click", (e) => {
+                      document.querySelectorAll("#Colors .pallette").forEach(elem => { elem.classList.remove("selected"); });
+                      e.preventDefault();
+                      if (e.target.className === "pallette") {
+                        e.target.classList.add("selected")
+                        selectedColorName = e.target.getAttribute("name");
+                      } else {
+                        e.target.parentNode.classList.add("selected")
+                        seletedColorName = e.target.parentNode.getAttribute("name");
+                      }
+                      
+              });
+            });
+            })();
+            
+
+            colorChange.addEventListener("click", async (event)=> {
+              let response = await fetchAsync("/api/color/change/" + selectedColorName);
+              statusText.value = statusText.value + '\n' + response;
+            })
+
+            addSequenceItem.addEventListener("click", async (event)=> {
+              const sequenceItem = document.getElementById("SequenceItem");
+              const response = await fetch('/api/sequence', {
+                 method: 'POST',
+                 headers: {
+                   'Content-Type': 'application/json'
+                   },
+                   body: JSON.stringify({
+                     sequence: sequenceItem.value
+                    })
+                 });
+                 const data = await response.json();
+              // enter you logic when the fetch is successful
+                 console.log(data);
+            })
+
+
+            startButton.addEventListener("click", async (event)=> {
+              let response = await fetchAsync("/api/start");
+              console.log("start");
+              status.value = 'start';
+              statusText.value = statusText.value + '\n' + response;
+            })
+
+            stopButton.addEventListener("click", async (event)=> {
+              let response = await fetchAsync("/api/stop");
+              statusText.value = statusText.value + '\n' + response;
+            })
+
+            loopButton.addEventListener("click", async (event)=> {
+              let response = await fetchAsync("/api/loop");
+              statusText.value = statusText.value + '\n' + response;
+            })
+
+            statusButton.addEventListener("click", async (event)=> {
+              let response = await fetchAsync("/api/status");
+              statusText.value = statusText.value + '\n' + response;
+            })
+
+            async function fetchAsync(url) {
+              let response = await fetch(url);
+              let data = await response.text();
+              return JSON.parse(data);
+            }
+        })    
+    </script>
+</html>
