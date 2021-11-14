@@ -35,3 +35,6 @@ Web interface is able to start and stop the tree lights.  You can manually creat
 
 ### Ideas for Improvements
 * Seperate out Effects into their own files and auto-load them on start
+* Add web sockets to broadcast changes to the backend tree modules status
+* Add ability to create custom color palettes 
+* Show current effect sequences and allow editing in the web interface
