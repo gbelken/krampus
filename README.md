@@ -30,7 +30,7 @@ Web interface is able to start and stop the tree lights.  You can manually creat
 ``
 * Add to bottom of crontab file
 ``
- @reboot sudo python3 /home/pi/ChristmasTree/krampus/server.py > /home/pi/ct.log
+ @reboot sudo python3 /home/pi/ChristmasTree/krampus/server.py
 ``
 
 ### Ideas for Improvements
