@@ -3,11 +3,12 @@ import board
 import constants
 import neopixel
 import random
+import time
 
 class ChristmasTree:
     """Class to control the operation of WS2811 lights.  Default 50 lights and GPIO pin D18 for data, segment size of 25 pixels """
 
-    def __init__(self, pin=board.D18, numberOfLeds=400, segmentSize=25):
+    def __init__(self, pin=board.D18, numberOfLeds=500, segmentSize=25):
         self.pin = pin
         self.numberOfLeds = numberOfLeds
         self.segments = []
@@ -98,12 +99,15 @@ class ChristmasTree:
         for i in reversed(range(self.segmentSize)):
             for s in self.segments:
                 self.__setPixel(s[i], colors[colorIndex])
-                self.pixels.show()
+            
+            self.pixels.show()
             
             colorIndex +=1
 
             if colorIndex > len(colors) - 1:
                 colorIndex = 0
+        
+        time.sleep(60)
                 
 
     async def SegmentRotator(self, colorFunc):   
@@ -232,3 +236,9 @@ class ChristmasTree:
                 pixelCounter += 1
             else:
                 c+=1
+
+if __name__ == '__main__':
+    print("Starting Christmas Tree Test Pattern")
+    while True:
+        ct = ChristmasTree()
+        ct.TestPattern()
