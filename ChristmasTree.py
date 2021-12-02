@@ -1,4 +1,5 @@
 import asyncio
+from typing import Sequence
 import board
 import constants
 import neopixel
@@ -26,7 +27,6 @@ class ChristmasTree:
         return self[key]
     
     def __setItem__(self, key, value):
-        print("Set Key: " + key + " value: " + value)
         self[key] = value
     
     async def StartAnimation(self):
@@ -37,13 +37,13 @@ class ChristmasTree:
         print("Stop, Turn off pixels")
         self.running = False
 
-        await self.TreeColor(self.getColor(constants.CLEAR))
+        await self.TreeColor(self.getColor(constants.CLEAR), [])
 
     ###########################################################################################################     
     ### Lighting Effects ######################################################################################
     ###########################################################################################################
 
-    async def TopToBottom(self, colorFunc):
+    async def TopToBottom(self, colorFunc, colorCount):
         """Lights each row of lights starting from the top to the bottom"""
 
         if (self.running == False):
@@ -55,7 +55,7 @@ class ChristmasTree:
             self.pixels.show()
             await asyncio.sleep(0.1)
     
-    async def BottomUp(self, colorFunc):
+    async def BottomUp(self, colorFunc, colorCount):
         """Lights each row of lights starting from the bottom to the top"""
 
         if (self.running == False):
@@ -68,7 +68,7 @@ class ChristmasTree:
             self.pixels.show()
             await asyncio.sleep(0.1)
 
-    async def SnakeTheTree(self, colorFunc):
+    async def SnakeTheTree(self, colorFunc, colorCount):
         """Sets the color of each bulb one by one up and down each strand of lights on to the next.  Zig-zag motion."""
         
         for i in range(self.numberOfLeds):
@@ -79,7 +79,7 @@ class ChristmasTree:
             self.pixels.show()
             await asyncio.sleep(0.0001)
     
-    async def TreeSpiral(self, colorFunc):
+    async def TreeSpiral(self, colorFunc, colorCount):
         """Sets the vertical color of each strand to a single color.  Rotates thru each vertical strand setting the color"""
 
         for i in reversed(range(self.segmentSize)):
@@ -110,23 +110,23 @@ class ChristmasTree:
         time.sleep(60)
                 
 
-    async def SegmentRotator(self, colorFunc):   
+    async def SegmentRotator(self, colorFunc, colorCount):   
         """Iterates thru each segment and sets all the lights to the same color at the same time. Then repeats for each segment on the tree."""
         
         if (self.running == False):
             return
 
-        for strand in self.segments:
-            strandColor = colorFunc(0)
+        for i, strand in enumerate(self.segments):
+            strandColor = colorFunc(i)
             
             for pixelIndex in strand:    
                 self.__setPixel(pixelIndex, strandColor)
             
-            self.__showPixel()
+            await self.__showPixel()
             await asyncio.sleep(0.09)
 
-    async def RainbowTree(self, colors):
-        pixelsPerColor = int(self.numberOfLeds / len(colors))
+    async def RainbowTree(self, colorsFunc, colorCount):
+        pixelsPerColor = int(self.numberOfLeds / colorCount)
         pixelCounter = 0
         colorIndex = 0
 
@@ -138,7 +138,7 @@ class ChristmasTree:
             if (self.running == False):
                 return
             for s in self.segments:
-                self.__setPixel(s[i], colors[colorIndex])
+                self.__setPixel(s[i], colorsFunc(colorIndex))
                 pixelCounter += 1
                 await self.__showPixel()
 
@@ -146,7 +146,7 @@ class ChristmasTree:
                     pixelCounter = 0
                     colorIndex += 1
                 
-                if colorIndex > len(colors) - 1:
+                if colorIndex > colorCount - 1:
                     colorIndex = 0
 
                 await asyncio.sleep(.0005)
@@ -171,8 +171,7 @@ class ChristmasTree:
         self.pixels.brightness = 0.3
         await self.__showPixel()
 
-    async def TreeColor(self, colorFunc):
-        
+    async def TreeColor(self, colorFunc, colors):
         self.pixels.fill(colorFunc(0))
         await self.__showPixel()
         await asyncio.sleep(1)
@@ -183,7 +182,7 @@ class ChristmasTree:
     ###########################################################################################################
 
     def randomColor(self, colors):
-        return lambda index: colors[random.randint(0, (len(colors) - 1))]
+        return lambda index: colors[random.randint(0, (len(colors) - 1))], colors
 
     def __setPixel(self, index, color):
         """Observes the running flag on this class, it not running pixels will not get set"""
@@ -195,22 +194,37 @@ class ChristmasTree:
         if self.running:
             self.pixels.show()
     
-    def __ternary(index, option1, option2):
-        if index % 2:
-            return option1
-        else:
-            return option2
+    def colorByIndex(self, index, colors):
+        idx = 0
+        for i in range(index):
+           idx += 1
+           if idx >= len(colors): idx = 0
+        
+        return colors[idx]
 
-    def colorAlternator(self, color1, color2):
-        return lambda index: self.__ternary(index, color1, color2)
+    def colorAlternator(self, colors):
+        return lambda index: self.colorByIndex(index, colors), colors
 
     def getColor(self, color):
         return lambda index: color
 
+    async def sequenceRunner(self, sequences):
+        while self.running:
+            for seq in sequences:
+                colorFunc, colors = self.__getattribute__(seq["colorFunc"])(seq['colors'])
+
+                for effect in seq["effects"]:    
+                    effectFunc = self.__getattribute__(effect)
+                    if seq["iteratorFunc"]:
+                        iteratorFunc = self.__getattribute__(seq["iteratorFunc"])
+                        await iteratorFunc(seq['colors'], effectFunc)
+                    else:
+                        await effectFunc(colorFunc, len(colors))
+
     async def colorIterator(self, colors, iteratorFunc):
         for color in colors:
             if self.running:
-                await iteratorFunc(self.getColor(color))
+                await iteratorFunc(self.getColor(color), len(colors))
     
 
     def __buildSegments(self):
@@ -239,6 +253,17 @@ class ChristmasTree:
 
 if __name__ == '__main__':
     print("Starting Christmas Tree Test Pattern")
-    while True:
-        ct = ChristmasTree()
-        ct.TestPattern()
+    ct = ChristmasTree()
+    ca, colors = ct.colorAlternator([constants.CLEAR, constants.GREEN, constants.BLUE])
+    rc, cl = ct.randomColor(constants.christmasColorsTraditional)
+
+    effectSequence = [
+        #{ 'id': 0, 'iteratorFunc': None, 'colorFunc': 'colorAlternator', 'effects': ['TopToBottom', 'BottomUp'], 'colors': [constants.RED, constants.GREEN] },
+        #{ 'id': 1, 'iteratorFunc': None, 'colorFunc': 'colorAlternator', 'effects': ['SnakeTheTree', 'TreeSpiral', 'RainbowTree', 'SegmentRotator', 'TopToBottom'], 'colors': constants.christmasColorsTraditional },
+        #{ 'id': 2, 'iteratorFunc': 'colorIterator', 'colorFunc': 'randomColor', 'effects': ['TreeColor'], 'colors': constants.christmasColorsExtended },
+        #{ 'id': 3, 'iteratorFunc': None, 'colorFunc': 'colorAlternator', 'effects': ['SnakeTheTree', 'TreeSpiral', 'RainbowTree', 'SegmentRotator', 'TopToBottom'], 'colors': constants.christmasColorsTraditional },
+        { 'id': 4, 'iteratorFunc': None, 'colorFunc': 'colorAlternator', 'effects': ['RainbowTree'], 'colors': constants.rainbowColors },
+        #{ 'id': 5, 'iteratorFunc': None, 'colorFunc': 'colorAlternator', 'effects': ['TreeSpiral'], 'colors': [ constants.CLEAR ] },
+        #{ 'id': 1, 'iteratorFunc': 'colorIterator', 'colorFunc': 'colorAlternator', 'effects': ['TreeSpiral'], 'colors': constants.rainbowColors },
+    ]
+    asyncio.run(ct.sequenceRunner(effectSequence))

@@ -17,7 +17,7 @@ ct = ChristmasTree() #Using Defaults
 count = 0
 colors = [{'name': 'rainbow', 'colors': constants.rainbowColors}, 
           {'name': 'halloween', 'colors': constants.halloweenColors},
-          {'name': 'christmas', 'colors': constants.christmasColors}]
+          {'name': 'christmas', 'colors': constants.christmasColorsTraditional}]
 
 
 def findPalette(color):
@@ -26,7 +26,17 @@ def findPalette(color):
 
 colorPalette = constants.rainbowColors
 
-print("color: " + str(findPalette("halloween")))
+effectSequence = [
+        { 'id': 0, 'iteratorFunc': None, 'colorFunc': 'colorAlternator', 'effects': ['TopToBottom'], 'colors': [constants.RED, constants.GREEN] },
+        { 'id': 0, 'iteratorFunc': None, 'colorFunc': 'colorAlternator', 'effects': ['TopToBottom'], 'colors': [constants.GREEN, constants.RED] },
+        { 'id': 1, 'iteratorFunc': None, 'colorFunc': 'colorAlternator', 'effects': ['TopToBottom'], 'colors': [ constants.CLEAR ] },
+        { 'id': 1, 'iteratorFunc': 'colorIterator', 'colorFunc': 'colorAlternator', 'effects': ['TreeSpiral'], 'colors': constants.rainbowColors },
+        #{ 'id': 1, 'iteratorFunc': None, 'colorFunc': 'colorAlternator', 'effects': ['SnakeTheTree', 'TreeSpiral', 'RainbowTree', 'SegmentRotator', 'TopToBottom'], 'colors': constants.christmasColorsTraditional },
+        #{ 'id': 2, 'iteratorFunc': 'colorIterator', 'colorFunc': 'randomColor', 'effects': ['TreeColor'], 'colors': constants.christmasColorsExtended },
+        #{ 'id': 3, 'iteratorFunc': None, 'colorFunc': 'colorAlternator', 'effects': ['SnakeTheTree', 'TreeSpiral', 'RainbowTree', 'SegmentRotator', 'TopToBottom'], 'colors': constants.christmasColorsTraditional },
+        { 'id': 4, 'iteratorFunc': None, 'colorFunc': 'colorAlternator', 'effects': ['RainbowTree'], 'colors': constants.rainbowColors },
+        { 'id': 5, 'iteratorFunc': None, 'colorFunc': 'colorAlternator', 'effects': ['TreeSpiral'], 'colors': [ constants.CLEAR ] },
+]
 
 sequenceLoop = []
 
@@ -35,17 +45,8 @@ currentSequence = ""
 async def effectWorker():
     global count
     global currentSequence
-    while isloop:
-        for effect in sequenceLoop:
-            currentSequence = effect
-            if effect == "RainbowTree":
-                await ct.RainbowTree(colorPalette)
-            else:
-                await ct.colorIterator(colorPalette, ct.__getattribute__(effect))
-            await asyncio.sleep(0)
-        
-        count += 1
-        print("Effects Loop Count: " + str(count))
+    
+    await ct.sequenceRunner(effectSequence)
 
 loop = asyncio.get_event_loop()
 
@@ -73,14 +74,19 @@ async def get_status_handler(request):
 
 @routes.get('/api/start')
 async def get_start_handler(request):
+    print("Turn on lights (Start)")
     await ct.StartAnimation()
-    await ct.TreeColor(ct.getColor(constants.GREEN))
+    await ct.TreeColor(ct.getColor(constants.GREEN), [])
     return web.json_response({"Status": "On", "Color": "Green"})
 
 @routes.get('/api/stop')
 async def get_stop_handler(request):
+    print("Stop this whole show")
+    global loop
+    loop.stop()
     await ct.StopAnimation()
     global isloop
+    
     isloop = False
     return web.json_response({"Status": "Off", "Color": "Clear"})
 
