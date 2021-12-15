@@ -1,8 +1,6 @@
 import './App.css';
 import CssBaseline from '@mui/material/CssBaseline'
 import Particles from "react-tsparticles";
-import Button from '@mui/material/Button';
-import ColorPicker from 'material-ui-color-picker'
 import Remote from './Remote';
 
 function App() {
