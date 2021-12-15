@@ -43,7 +43,7 @@ class ChristmasTree:
     async def IncreaseDelay(self):
         self.delay += .1
     
-    async def IncreaseDelay(self):
+    async def DecreaseDelay(self):
         self.delay -= .1
 
     async def IncreaseBrightness(self):
