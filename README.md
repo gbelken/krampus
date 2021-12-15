@@ -13,9 +13,9 @@ Web interface is able to start and stop the tree lights.  You can manually creat
 ### Getting started
 
 1. Clone repo
-2. pip install -r requirements.txt
+2. sudo pip3 install -r requirements.txt
 3. sudo python3 krampus/server.py
-4. Open localhost:8080
+4. Open localhost
 
 ### PI Hookup Configuration
 * Default GPIO data port 18
