@@ -20,7 +20,7 @@ class ChristmasTree:
         self.__buildSegments()
 
         self.pixels = neopixel.NeoPixel(
-            self.pin, self.numberOfLeds, brightness=self.brightness, auto_write=False, pixel_order=neopixel.RGB)
+            self.pin, self.numberOfLeds, brightness=self.brightness, auto_write=True, pixel_order=neopixel.RGB)
 
         print("Christmas Tree Initialized, GPIO pin: " + str(self.pin) + " Number of LEDS: " + str(self.numberOfLeds))
 
@@ -49,10 +49,12 @@ class ChristmasTree:
     async def IncreaseBrightness(self):
         self.brightness += .1
         self.pixels.brightness = self.brightness
+        self.pixels.show()
     
     async def DecreaseBrightness(self):
         self.brightness -= .1
         self.pixels.brightness = self.brightness
+        self.pixels.show()
             
 
 
@@ -168,7 +170,7 @@ class ChristmasTree:
 
                 await asyncio.sleep(.0005 + self.delay)
             
-            await asyncio.sleep(1)
+        await asyncio.sleep(1)
 
 
 
