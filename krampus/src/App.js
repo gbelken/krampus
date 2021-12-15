@@ -118,7 +118,7 @@ function App() {
             "retina_detect": true
           }} className="App-particles__container" />
         <CssBaseline />
-        <div style={{ position: 'absolute', left: '0', right: '0', marginLeft: 'auto', marginRight: 'auto', width: '300px', padding:'10px', backgroundColor: '#fff'}}>
+        <div style={{ position: 'absolute', left: '0', right: '0', marginLeft: 'auto', marginRight: 'auto', marginTop: '80px', width: '370px', padding:'10px', backgroundColor: '#fff'}}>
           <Remote />
         </div>
       </div>

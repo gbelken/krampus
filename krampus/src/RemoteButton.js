@@ -9,11 +9,11 @@ let BaseStyle = {
     color: '#fff',
     cursor: 'pointer',
     float: 'left',
-    height: '50px',
-    lineHeight: '30px',
+    height: '70px',
+    lineHeight: '48px',
     margin: '5px',
     padding: '10px',
-    width: '50px',
+    width: '70px',
 };
 
 let activeStyle = {
@@ -22,13 +22,18 @@ let activeStyle = {
     boxShadow: '3px 2px 22px 1px rgba(0, 0, 0, 0.24)'
 };
 
+let largeIcon = {
+    width: 55,
+    height: 55,
+};
+
 function RemoteButton(props) {
     let componentStyle = {...BaseStyle}
     componentStyle.backgroundColor = props.color
     componentStyle.color = props.textColor
 
     if (props.data.icon) {
-        componentStyle.lineHeight = '5px';
+        componentStyle.lineHeight = '55px';
         componentStyle.padding = '0px';
     }
 
@@ -46,7 +51,7 @@ function RemoteButton(props) {
     return (
     <div style={componentStyle} activeStyle={activeStyle} onClick={onClickHandler}>
         <Textfit mode="single">
-            {props.data.icon ? <props.data.icon /> : props.text}
+            {props.data.icon ? <props.data.icon style={largeIcon} /> : props.text}
         </Textfit>
     </div>
   );
