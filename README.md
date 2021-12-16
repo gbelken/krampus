@@ -3,7 +3,9 @@
 ### What is this?
 
 Krampus is a controller to drive and control neoPixel LEDS using the WS281x protocol.  Krampus models LEDs to be arranged as a Christmas Tree or on a tree.  
-Web interface is able to start and stop the tree lights.  You can manually create a sequeuence of effects and start the loop of animation.
+Web interface is able to start and stop the tree lights, set the color or start a loop of prebaked sequence of effects.
+
+<img src="https://raw.githubusercontent.com/gbelken/krampus/master/WebRemote.png" width="300" >
 
 ### Equipment Needed
 * NeoPixel supporting WS281x protocol
@@ -32,9 +34,3 @@ Web interface is able to start and stop the tree lights.  You can manually creat
 ``
  @reboot sudo python3 {path-to-project}/krampus/server.py
 ``
-
-### Ideas for Improvements
-* Seperate out Effects into their own files and auto-load them on start
-* Add web sockets to broadcast changes to the backend tree modules status
-* Add ability to create custom color palettes 
-* Show current effect sequences and allow editing in the web interface
